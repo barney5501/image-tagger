@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image🖼tagger🔖</title>
+  </head>
+  <body>
+    <header>imagename {{ imagename }}</header>
+    {% block body %}
+    <div id="imageholder">
+    <span class="imageControl"> < </span>
+    <img src="{{ url_for('static', filename='images/image.png') }}"></img>
+    <span class="imageControl"> > </span>
+    </div>
+    <div id="tags">
+      <span class="tag">tag1 <button class="removeTag">x</button></p>
+    </div>
+    <div id="add">
+      <input type="text" placeholder="add tags..." /><button>+</button>
+    </div>
+    {% endblock %}
+    <br />
+    
+    <div id="tags"></div>
+  </body>
+
+</html>
+<style>
+    img {
+        width: 300px;
+    }
+    #imageholder {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .imageControl {
+      align-content: center;
+      margin: 5px;
+      height: min-content;
+    }
+    .imageControl:hover {
+      cursor: pointer;
+    }
+    #tags {
+      display: grid;
+      grid-template-columns: repeat(4, 30px);
+      margin-bottom: 20px;
+    }
+    .tag{
+      background-color: rgba(72, 177, 238, 0.296);
+      border-radius: 15px;
+      width: 26px;
+      font-size: 8px;
+      color: white;
+      padding: 3px;
+      text-align: center;
+      height: min-content;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 3px;
+    }
+    .removeTag {
+      font-size: 6px !important;
+      padding: 0;
+      color: rgb(255, 255, 255);
+      padding: 0;
+      background-color: rgba(20, 47, 62, 0.696);
+      border-radius: 3px;
+      border: none;
+      width: 7px;
+      height: 7px;
+      align-self: flex-start;
+    }
+    .removeTag:hover {
+      cursor: pointer;
+    }
+</style>
+
+<script>
+let imageIndex = 0;
+</script>

@@ -9,9 +9,9 @@
     <header>imagename {{ imagename }}</header>
     {% block body %}
     <div id="imageholder">
-    <span class="imageControl"> < </span>
-    <img src="{{ url_for('static', filename='images/image.png') }}"></img>
-    <span class="imageControl"> > </span>
+    <span class="imageControl" id="controlPrevious"> < </span>
+    <img id="displayImage" data-images-path="{{ imagesPath }}" src="{{ imagesPath }}/{{ currentImage }}"></img>
+    <span class="imageControl" id="controlNext"> > </span>
     </div>
     <div id="tags">
       <span class="tag">tag1 <button class="removeTag">x</button></p>
@@ -82,5 +82,29 @@
 </style>
 
 <script>
-let imageIndex = 0;
+
+// Image
+const displayImage = document.getElementById('displayImage');
+const imagesPath = displayImage.dataset.imagesPath;
+console.log(imagesPath);
+
+// Buttons
+const next = document.getElementById('controlNext');
+const prev = document.getElementById('controlPrevious');
+
+next.onclick = () => { fetch('/nextImage')
+              .then(res=>res.json())
+              .then(data=>{
+                console.log(data);
+                displayImage.src = `${imagesPath}/${data}`
+              })
+            };
+prev.onclick = () => { fetch('/prevImage')
+              .then(res=>res.json())
+              .then(data=>{
+                console.log(data);
+                displayImage.src = `${imagesPath}/${data}`
+              })
+            };
+
 </script>

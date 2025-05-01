@@ -6,35 +6,62 @@
     <title>Image🖼tagger🔖</title>
   </head>
   <body>
-    <header>imagename {{ imagename }}</header>
+    <header id="imageNameHeader"></header>
     {% block body %}
+    
+    
     <div id="imageholder">
-    <span class="imageControl" id="controlPrevious"> < </span>
-    <img id="displayImage" data-images-path="{{ imagesPath }}" src="{{ imagesPath }}/{{ currentImage }}"></img>
-    <span class="imageControl" id="controlNext"> > </span>
+      <!-- <img id="displayImage" data-image-name="{{ currentImage }}" data-images-path="{{ imagesPath }}" src="{{ imagesPath }}/{{ currentImage }}"></img> -->
+      <img id="displayImage" data-image-name="{{ currentImage }}" data-images-path="{{ imagesPath }}" src="../static/images/image.png"></img>    
     </div>
-    <div id="tags">
-      <span class="tag">tag1 <button class="removeTag">x</button></p>
-    </div>
-    <div id="add">
-      <input type="text" placeholder="add tags..." /><button>+</button>
+    <hr style="width: 100%; position: fixed; bottom: 64vh;">
+    <div id="interactives">
+      
+      <div id="imageControls">
+        <span class="imageControl" id="controlPrevious"> < </span>
+        <span class="imageControl" id="controlNext"> > </span>
+      </div>
+      
+      <div id="tags">
+        <span class="tag">reactions<button class="removeTag">x</button></span>
+        <span class="tag">dogs<button class="removeTag">x</button></span>
+        <span class="tag">foodaroundtheworld<button class="removeTag">x</button></span>
+        <span class="tag">cute<button class="removeTag">x</button></span>
+        <span class="tag">oreos<button class="removeTag">x</button></span>
+      </div>
+
+      <div id="add">
+        <input type="text" placeholder="add tags..." /><button>+</button>
+      </div>
+
     </div>
     {% endblock %}
     <br />
-    
-    <div id="tags"></div>
   </body>
 
 </html>
 <style>
+  body{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  #imageNameHeader {
+    font-size: 24px;
+  }
     img {
         width: 300px;
     }
-    #imageholder {
+    #interactives {
       display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      position: fixed;
+      bottom: 52vh;
+      left: 39%;
     }
     .imageControl {
       align-content: center;
@@ -46,15 +73,18 @@
     }
     #tags {
       display: grid;
-      grid-template-columns: repeat(4, 30px);
+      width: 100%;
+      grid-template-columns: repeat(4, auto);
       margin-bottom: 20px;
+      justify-content: center;
     }
     .tag{
       background-color: rgba(72, 177, 238, 0.296);
-      border-radius: 15px;
-      width: 26px;
-      font-size: 8px;
-      color: white;
+      border-radius: 18px;
+      min-width: 46px;
+      width: fit-content;
+      font-size: 16px;
+      color: black;
       padding: 3px;
       text-align: center;
       height: min-content;
@@ -63,18 +93,22 @@
       align-items: center;
       justify-content: flex-end;
       margin-top: 3px;
+      margin-right: 16px !important;
     }
     .removeTag {
-      font-size: 6px !important;
+      font-size: 12px !important;
       padding: 0;
       color: rgb(255, 255, 255);
       padding: 0;
       background-color: rgba(20, 47, 62, 0.696);
-      border-radius: 3px;
+      border-radius: 7px;
       border: none;
-      width: 7px;
-      height: 7px;
+      width: 13px !important;
+      height: 13px !important;
       align-self: flex-start;
+    }
+    .tag:hover{
+      cursor: default;
     }
     .removeTag:hover {
       cursor: pointer;
@@ -86,7 +120,9 @@
 // Image
 const displayImage = document.getElementById('displayImage');
 const imagesPath = displayImage.dataset.imagesPath;
-console.log(imagesPath);
+const imageNameHeader = document.getElementById('imageNameHeader');
+imageNameHeader.innerText = displayImage.dataset.imageName;
+
 
 // Buttons
 const next = document.getElementById('controlNext');
@@ -95,15 +131,15 @@ const prev = document.getElementById('controlPrevious');
 next.onclick = () => { fetch('/nextImage')
               .then(res=>res.json())
               .then(data=>{
-                console.log(data);
                 displayImage.src = `${imagesPath}/${data}`
+                imageNameHeader.innerText = data
               })
             };
-prev.onclick = () => { fetch('/prevImage')
-              .then(res=>res.json())
-              .then(data=>{
-                console.log(data);
-                displayImage.src = `${imagesPath}/${data}`
+            prev.onclick = () => { fetch('/prevImage')
+            .then(res=>res.json())
+            .then(data=>{
+              displayImage.src = `${imagesPath}/${data}`
+              imageNameHeader.innerText = data
               })
             };
 

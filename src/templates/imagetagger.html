@@ -23,11 +23,11 @@
       </div>
       
       <div id="tags">
-        <span class="tag">reactions<button class="removeTag">x</button></span>
-        <span class="tag">dogs<button class="removeTag">x</button></span>
-        <span class="tag">foodaroundtheworld<button class="removeTag">x</button></span>
-        <span class="tag">cute<button class="removeTag">x</button></span>
-        <span class="tag">oreos<button class="removeTag">x</button></span>
+        <!-- <span class="tag">reactions<button class="removeTag" onclick="removeTag(this)">x</button></span>
+        <span class="tag">dogs<button class="removeTag" onclick="removeTag(this)">x</button></span>
+        <span class="tag">foodaroundtheworld<button class="removeTag" onclick="removeTag(this)">x</button></span>
+        <span class="tag">cute<button class="removeTag" onclick="removeTag(this)">x</button></span>
+        <span class="tag">oreos<button class="removeTag" onclick="removeTag(this)">x</button></span> -->
       </div>
 
       <div id="add">
@@ -123,6 +123,8 @@ const imagesPath = displayImage.dataset.imagesPath;
 const imageNameHeader = document.getElementById('imageNameHeader');
 imageNameHeader.innerText = displayImage.dataset.imageName;
 
+// Tags
+const tagsHolder = document.getElementById('tags');
 
 // Buttons
 const next = document.getElementById('controlNext');
@@ -133,6 +135,24 @@ const update_image = (image_data) => {
   const image_tags = image_data['tags'];
   displayImage.src = `${imagesPath}/${image_name}`;
   imageNameHeader.innerText = image_name;
+  update_tags(image_tags);
+}
+
+const update_tags = (tags) => {
+  tagsHolder.innerHTML = '';
+  tags.forEach(tagText => {
+    let tag = document.createElement('span');
+    tag.classList.add('tag');
+    tag.innerText = tagText;
+
+    let removeTagBtn = document.createElement('button');
+    removeTagBtn.classList.add('removeTag');
+    removeTagBtn.innerText = 'x';
+    removeTagBtn.onclick = e => e.target.parentNode.remove();
+
+    tag.appendChild(removeTagBtn)
+    tagsHolder.appendChild(tag);
+  });
 }
 
 const navigateImages = (dir) => {

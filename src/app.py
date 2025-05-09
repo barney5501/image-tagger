@@ -18,6 +18,7 @@ def get_db():
         db = g._database = sqlite3.connect(DATABASE)
     return db
 
+
 @app.route("/")
 def main():
     cur = get_db().cursor()
@@ -38,22 +39,35 @@ def tagger():
 def next():
     global imageIndex
     if imageIndex != (len(imagesList) - 1):
-        next_image = jsonify(imagesList[imageIndex + 1])
+        next_image = imagesList[imageIndex + 1]
+        tags = get_tags(next_image)
+        res = {"image": next_image, "tags": tags}
         imageIndex += 1
-        return next_image
+        return jsonify(res)
     else:
-        return jsonify(imagesList[imageIndex])
+        return ("", 204)
 
 
 @app.route("/prevImage")
 def previousImage():
     global imageIndex
     if imageIndex != 0:
-        previous_image = jsonify(imagesList[imageIndex - 1])
+        previous_image = imagesList[imageIndex - 1]
+        tags = get_tags(previous_image)
+        res = {"image": previous_image, "tags": tags}
         imageIndex -= 1
-        return previous_image
+        return jsonify(res)
     else:
-        return jsonify(imagesList[imageIndex])
+        return ("", 204)
+
+
+def get_tags(img_name):
+    cur = get_db().cursor()
+    tag_query = f'select tag from tags where path = "{img_name}"'
+
+    tags = cur.execute(tag_query).fetchall()
+    image_tags = [tag for tagtuple in tags for tag in tagtuple]
+    return image_tags
 
 
 @app.teardown_appcontext

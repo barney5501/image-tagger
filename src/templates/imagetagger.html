@@ -128,19 +128,29 @@ imageNameHeader.innerText = displayImage.dataset.imageName;
 const next = document.getElementById('controlNext');
 const prev = document.getElementById('controlPrevious');
 
-next.onclick = () => { fetch('/nextImage')
-              .then(res=>res.json())
-              .then(data=>{
-                displayImage.src = `${imagesPath}/${data}`
-                imageNameHeader.innerText = data
-              })
-            };
-            prev.onclick = () => { fetch('/prevImage')
-            .then(res=>res.json())
-            .then(data=>{
-              displayImage.src = `${imagesPath}/${data}`
-              imageNameHeader.innerText = data
-              })
-            };
+const update_image = (image_data) => {
+  const image_name = image_data['image'];
+  const image_tags = image_data['tags'];
+  displayImage.src = `${imagesPath}/${image_name}`;
+  imageNameHeader.innerText = image_name;
+}
+
+const navigateImages = (dir) => {
+  fetch(`/${dir}Image`)
+    .then(res => {
+      if(res.status == 204){
+        return null;
+      }
+      return res.json();
+    })
+    .then(data => {
+      if(data){
+        update_image(data)
+      }
+    })
+}
+
+next.onclick = () => {navigateImages('next')};
+prev.onclick = () => {navigateImages('prev')};
 
 </script>

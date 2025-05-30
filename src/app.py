@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, g
+from flask import Flask, render_template, jsonify, g, request
 import os
 import sqlite3
 
@@ -36,7 +36,7 @@ def tagger():
 
 
 @app.route("/image/<direction>")
-def navigateImages():
+def navigateImages(direction):
     global imageIndex
     directions = {"prev": -1, "next": 1}
     direction = directions[direction]
@@ -83,6 +83,16 @@ def get_tags(img_name):
     tags = cur.execute(tag_query).fetchall()
     image_tags = [tag for tagtuple in tags for tag in tagtuple]
     return image_tags
+
+
+@app.route("/addTags", methods=["POST"])
+def add_tag():
+    cur = get_db().cursor()
+    currentImage = imagesList[imageIndex]
+    tags = request.json
+    for tag in tags:
+        cur.execute(f"insert into tags values({currentImage}, {tag})")
+    return 200
 
 
 @app.teardown_appcontext

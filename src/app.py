@@ -22,7 +22,7 @@ def get_db():
 @app.route("/")
 def main():
     cur = get_db().cursor()
-    res = cur.execute("select * from tags;").fetchall()
+    res = cur.execute("SELECT * FROM tags;").fetchall()
     return res
     # return "Image Tagger!"
 
@@ -78,21 +78,42 @@ def previousImage():
 
 def get_tags(img_name):
     cur = get_db().cursor()
-    tag_query = f"select tag from tags where path = '{img_name}'"
+    tag_query = f"SELECT tag FROM tags WHERE path = '{img_name}'"
 
     tags = cur.execute(tag_query).fetchall()
     image_tags = [tag for tagtuple in tags for tag in tagtuple]
     return image_tags
 
 
-@app.route("/addTags", methods=["POST"])
-def add_tag():
+@app.route("/image/<image>/tags", methods=["POST"])
+def add_tag(image):
+    if image not in imagesList:
+        return (f"Sorry, image {image} does not exist!", 404)
     cur = get_db().cursor()
-    currentImage = imagesList[imageIndex]
+    image_tags = get_tags(img_name=image)
     tags = request.json
     for tag in tags:
-        cur.execute(f"insert into tags values({currentImage}, {tag})")
-    return 200
+        tag = tag.lower().strip()
+        if tag not in image_tags:
+            ddl = f'INSERT INTO tags VALUES("{image}", "{tag}")'
+            cur.execute(ddl)
+        get_db().commit()
+    return ("tags added", 200)
+
+
+@app.route("/image/<image>/tags/<tag>", methods=["DELETE"])
+def remove_tag(image, tag):
+    if image not in imagesList:
+        return (f"Sorry, image {image} does not exist!", 404)
+    image_tags = get_tags(img_name=image)
+    tag = tag.lower().strip()
+    if tag not in image_tags:
+        return (f"image {image} does not have tag {tag}.", 204)
+    cur = get_db().cursor()
+    ddl = f"DELETE FROM tags WHERE path = '{image}' AND tag = '{tag}'"
+    cur.execute(ddl)
+    get_db().commit()
+    return ("tag removed", 200)
 
 
 @app.teardown_appcontext

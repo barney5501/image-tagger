@@ -92,12 +92,13 @@ def add_tag(image):
     cur = get_db().cursor()
     image_tags = get_tags(img_name=image)
     tags = request.json
-    for tag in tags:
-        tag = tag.lower().strip()
-        if tag not in image_tags:
-            ddl = f'INSERT INTO tags VALUES("{image}", "{tag}")'
-            cur.execute(ddl)
-        get_db().commit()
+    insert_tags = [
+        (image, tag.lower().strip())
+        for tag in tags
+        if tag.lower().strip() not in image_tags
+    ]
+    cur.executemany("INSERT INTO tags VALUES(?,?)", insert_tags)
+    get_db().commit()
     return ("tags added", 200)
 
 

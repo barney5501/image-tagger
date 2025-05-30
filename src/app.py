@@ -35,8 +35,23 @@ def tagger():
     )
 
 
+@app.route("/image/<direction>")
+def navigateImages():
+    global imageIndex
+    directions = {"prev": -1, "next": 1}
+    direction = directions[direction]
+    if imageIndex not in [len(imagesList) - 1, 0]:
+        requested_image = imagesList[imageIndex + direction]
+        tags = get_tags(requested_image)
+        res = {"image": requested_image, "tags": tags}
+        imageIndex += direction
+        return jsonify(res)
+    else:
+        return ("", 204)
+
+
 @app.route("/nextImage")
-def next():
+def nextImage():
     global imageIndex
     if imageIndex != (len(imagesList) - 1):
         next_image = imagesList[imageIndex + 1]
@@ -63,7 +78,7 @@ def previousImage():
 
 def get_tags(img_name):
     cur = get_db().cursor()
-    tag_query = f'select tag from tags where path = "{img_name}"'
+    tag_query = f"select tag from tags where path = '{img_name}'"
 
     tags = cur.execute(tag_query).fetchall()
     image_tags = [tag for tagtuple in tags for tag in tagtuple]

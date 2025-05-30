@@ -155,8 +155,8 @@ const update_tags = (tags) => {
   });
 }
 
-const navigateImages = (dir) => {
-  fetch(`/${dir}Image`)
+const navigateImages = (direction) => {
+  fetch(`/${direction}Image`)
     .then(res => {
       if(res.status == 204){
         return null;

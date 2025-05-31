@@ -133,35 +133,8 @@ const next = document.getElementById('controlNext');
 const prev = document.getElementById('controlPrevious');
 const addTagButton = document.getElementById('addTagButton');
 
-const update_image = (image_data) => {
-  const image_name = image_data['image'];
-  const image_tags = image_data['tags'];
-  displayImage.src = `${imagesPath}/${image_name}`;
-  imageNameHeader.innerText = image_name;
-  update_tags(image_tags);
-}
-
-const createTag = (tagValue) => {
-  let tag = document.createElement('span');
-  tag.classList.add('tag');
-  tag.innerText = tagValue;
-  
-  let removeTagBtn = document.createElement('button');
-  removeTagBtn.classList.add('removeTag');
-  removeTagBtn.innerText = 'x';
-  removeTagBtn.onclick = e => e.target.parentNode.remove();
-  tag.appendChild(removeTagBtn);
-  
-  return tag;
-}
-
-const update_tags = (tags) => {
-  tagsHolder.innerHTML = '';
-  tags.forEach(tagValue => {
-    let tag = createTag(tagValue);
-    tagsHolder.appendChild(tag);
-  });
-}
+next.onclick = () => {navigateImages('next')};
+prev.onclick = () => {navigateImages('prev')};
 
 const navigateImages = (direction) => {
   fetch(`/${direction}Image`)
@@ -178,33 +151,106 @@ const navigateImages = (direction) => {
     })
 }
 
-next.onclick = () => {navigateImages('next')};
-prev.onclick = () => {navigateImages('prev')};
+const update_image = (image_data) => {
+  const image_name = image_data['image'];
+  const image_tags = image_data['tags'];
+  displayImage.src = `${imagesPath}/${image_name}`;
+  displayImage.dataset.imageName = image_name;
+  imageNameHeader.innerText = image_name;
+  update_tags(image_tags);
+};
 
-// add tag to image
-addTagButton.onclick = () => {
+const update_tags = (tags) => {
+  tagsHolder.innerHTML = '';
+  tags.forEach(tagValue => {
+    let tag = createTag(tagValue);
+    tagsHolder.appendChild(tag);
+  });
+};
+
+addTagButton.onclick = async () => {
+  const tagValue = tagInput.value;
+  if(tagValue == ''){
+    return;
+  }
+  const {status, _} = await addTagToImage(tagValue);
+  if(status == 200){
+    const newTag = createTag(tagValue);
+    tagsHolder.appendChild(newTag);
+  }
+  else if(status == 409){
+    console.log("tag already exists.");
+  }
+
+  tagInput.value = '';
+}
+
+const addTagToImage = (tagValue) => {
   const image = displayImage.dataset.imageName;
-  const addtagheaders = new Headers();
-  addtagheaders.append("Content-Type", "application/json");
-  const raw = JSON.stringify([tagInput.value]);
+
+  const reqheaders = new Headers();
+  reqheaders.append("Content-Type", "application/json");
   const requestoptions = {
     method: "POST",
-    headers: addtagheaders,
-    body: raw,
+    headers: reqheaders,
+    body: JSON.stringify([tagValue]),
     redirect: "follow"
   };
-  fetch(`/image/${image}/tags`, requestoptions)
-  .then(
-    (response)=>response.text()
-  )
-  .then(
-    (result)=>{
-      let newtag = createTag(tagInput.value);
-      tagsHolder.appendChild(newtag);
+
+  return fetch(`/image/${image}/tags`, requestoptions)
+  .then((response) => {
+    return {
+      status: response.status,
+      text: response.text()
+    };
+  })
+  .then(({status, text}) => {
+    return {status, text};
+  })
+  .catch((error) => console.error(error));
+};
+
+const createTag = (tagValue) => {
+  let tag = document.createElement('span');
+  tag.classList.add('tag');
+  tag.innerText = tagValue;
+  
+  let removeTagBtn = document.createElement('button');
+  removeTagBtn.classList.add('removeTag');
+  removeTagBtn.innerText = 'x';
+  removeTagBtn.onclick = async e => {
+    const {status, _} = await removeTagFromImage(tagValue);
+    if(status == 200){
+      console.log('removed');
+      e.target.parentNode.remove();
     }
-  )
-  .catch(
-    (error)=>console.error(error)
-  );
+    else if(status == 204){
+      console.log('nothing to remove');
+    }
+  };
+  tag.appendChild(removeTagBtn);
+  
+  return tag;
 }
+
+const removeTagFromImage = (tagValue) => {
+  const image = displayImage.dataset.imageName;
+
+  const requestoptions = {
+    method: "DELETE",
+    redirect: "follow"
+  };
+  return fetch(`/image/${image}/tags/${tagValue}`, requestoptions)
+  .then((response) => {
+    return {
+      status: response.status,
+      text: response.text()
+    };
+  })
+  .then(({status, text}) => {
+    return {status, text};
+  })
+  .catch((error) => console.error(error));
+}
+
 </script>

@@ -31,7 +31,7 @@
       </div>
 
       <div id="add">
-        <input type="text" placeholder="add tags..." /><button>+</button>
+        <input id="newTagText" type="text" placeholder="add tags..." /><button id="addTagButton">+</button>
       </div>
 
     </div>
@@ -40,6 +40,7 @@
   </body>
 
 </html>
+
 <style>
   body{
     display: flex;
@@ -125,10 +126,12 @@ imageNameHeader.innerText = displayImage.dataset.imageName;
 
 // Tags
 const tagsHolder = document.getElementById('tags');
+const tagInput = document.getElementById('newTagText');
 
 // Buttons
 const next = document.getElementById('controlNext');
 const prev = document.getElementById('controlPrevious');
+const addTagButton = document.getElementById('addTagButton');
 
 const update_image = (image_data) => {
   const image_name = image_data['image'];
@@ -138,19 +141,24 @@ const update_image = (image_data) => {
   update_tags(image_tags);
 }
 
+const createTag = (tagValue) => {
+  let tag = document.createElement('span');
+  tag.classList.add('tag');
+  tag.innerText = tagValue;
+  
+  let removeTagBtn = document.createElement('button');
+  removeTagBtn.classList.add('removeTag');
+  removeTagBtn.innerText = 'x';
+  removeTagBtn.onclick = e => e.target.parentNode.remove();
+  tag.appendChild(removeTagBtn);
+  
+  return tag;
+}
+
 const update_tags = (tags) => {
   tagsHolder.innerHTML = '';
-  tags.forEach(tagText => {
-    let tag = document.createElement('span');
-    tag.classList.add('tag');
-    tag.innerText = tagText;
-
-    let removeTagBtn = document.createElement('button');
-    removeTagBtn.classList.add('removeTag');
-    removeTagBtn.innerText = 'x';
-    removeTagBtn.onclick = e => e.target.parentNode.remove();
-
-    tag.appendChild(removeTagBtn)
+  tags.forEach(tagValue => {
+    let tag = createTag(tagValue);
     tagsHolder.appendChild(tag);
   });
 }
@@ -173,4 +181,30 @@ const navigateImages = (direction) => {
 next.onclick = () => {navigateImages('next')};
 prev.onclick = () => {navigateImages('prev')};
 
+// add tag to image
+addTagButton.onclick = () => {
+  const image = displayImage.dataset.imageName;
+  const addtagheaders = new Headers();
+  addtagheaders.append("Content-Type", "application/json");
+  const raw = JSON.stringify([tagInput.value]);
+  const requestoptions = {
+    method: "POST",
+    headers: addtagheaders,
+    body: raw,
+    redirect: "follow"
+  };
+  fetch(`/image/${image}/tags`, requestoptions)
+  .then(
+    (response)=>response.text()
+  )
+  .then(
+    (result)=>{
+      let newtag = createTag(tagInput.value);
+      tagsHolder.appendChild(newtag);
+    }
+  )
+  .catch(
+    (error)=>console.error(error)
+  );
+}
 </script>

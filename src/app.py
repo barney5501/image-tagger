@@ -119,6 +119,17 @@ def remove_tag(image, tag):
     return ("tag removed", 200)
 
 
+@app.route("/image/<image>/tags", methods=["DELETE"])
+def remove_all_tags(image):
+    if image not in imagesList:
+        return (f"Sorry, image {image} does not exist!", 404)
+    cur = get_db().cursor()
+    ddl = f"DELETE FROM tags WHERE path = '{image}'"
+    cur.execute(ddl)
+    get_db().commit()
+    return (f"reset {image} tags", 200)
+
+
 @app.teardown_appcontext
 def close_connection(e):
     db = getattr(g, "_database", None)

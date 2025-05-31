@@ -97,6 +97,8 @@ def add_tag(image):
         for tag in tags
         if tag.lower().strip() not in image_tags
     ]
+    if len(insert_tags) == 0:
+        return ("no new tags to add", 409)
     cur.executemany("INSERT INTO tags VALUES(?,?)", insert_tags)
     get_db().commit()
     return ("tags added", 200)
